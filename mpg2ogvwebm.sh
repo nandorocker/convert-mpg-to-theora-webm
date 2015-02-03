@@ -1,12 +1,14 @@
 #!/bin/sh
 
-for filename in *.mp4; do
+# Only execute actions if there are mp4 files in directory
+if [ "$(find $1 -type f -name '*.mp4')" ]; then
+	for filename in `find $1 -type f -name '*.mp4'`; do
 
-	# Only execute actions if there are mp4 files in directory
-	if (( ${#filename[@]} > 1 )); then
+		# Break up file name into variables filename & extension
 		extension="${filename##*.}"
 		filename="${filename%.*}"
-		echo "Converting file $extension.$filename...\n"
+		echo "Converting file $filename.$extension...\n"
+
 		# THEORA CONVERT
 		#
 		echo "Ogg Theora\n----------"
@@ -40,9 +42,7 @@ for filename in *.mp4; do
 		#
 		echo "Webm\n----"
 		ffmpeg -i "$filename.mp4" "$filename.webm"
-
-	else
-		echo "No mp4 files found in directory."
-
-	fi
-done
+	done
+else
+    echo "No mp4 files found in directory '$1'."
+fi
