@@ -7,18 +7,19 @@ if [ "$2" == "skip" ]; then
 	skip="$2"
 fi
 
-# Function to convert to theora
-converttheora()
+# Convert to something
+convert()
 {
-	echo "\nConverting $prefix.$extension to OggTheora...\n"
-	$(ffmpeg2theora $1)
-}
-
-# Function to convert to webm
-convertwebm()
-{
-	echo "\nConverting $prefix.$extension to Webm...\n"
-	$(ffmpeg -i $1 $pathprefix.webm)
+	case $1 in
+		"theora")
+			echo "\nConverting $2 to OggTheora...\n"
+			$(ffmpeg2theora $2)
+		;;
+		"webm")
+			echo "\nConverting $2 to Webm...\n"
+			$(ffmpeg -i $2 $pathprefix.webm)
+		;;
+	esac
 }
 
 # Only execute actions if there are mp4 files in directory
@@ -49,7 +50,7 @@ if [ "$(find $1 -type f -name '*.mp4')" ]; then
 
 				case $overwrite in
 					y) #echo "\nOVERWRITING FILE."
-						converttheora "$filename"
+						convert "theora" "$filename"
 					;;
 					n) #echo "\nNOT OVERWRITING FILE."
 					;;
@@ -63,7 +64,7 @@ if [ "$(find $1 -type f -name '*.mp4')" ]; then
 			done
 		else 
 			#echo "DESTINATION FILE '$path.ogv' DOESN'T EXIST; CONVERTING."
-			converttheora "$filename"
+			convert "theora" "$filename"
 		fi
 	done
 else
