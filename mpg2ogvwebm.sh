@@ -3,7 +3,7 @@
 # Argument $1 is directory PATH
 # Argument $2 is REPLACE FILES (y,n)
 #
-### Check this article out: http://askubuntu.com/questions/343727/filenames-with-spaces-breaking-for-loop-find-command
+### TODO Check this article out: http://askubuntu.com/questions/343727/filenames-with-spaces-breaking-for-loop-find-command
 
 # Array with file formats
 targetformat[0]="ogv"
@@ -80,7 +80,7 @@ if [ "$(find $1 -type f -name '*.mp4')" ]; then
 
 			# If 'do not overwrite' argument was invoked
 			elif [ -e "$pathprefix.$t_format" ] && [ "$2" == "n" ]; then
-				echo "Destination file '$pathprefix.$t_format' found; skipping."
+				echo "Destination file '$prefix.$t_format' found; skipping."
 			else
 				#echo "Destination file '$pathprefix.$t_format' not found; converting to $t_format."
 				convert "$t_format" "$filename"
