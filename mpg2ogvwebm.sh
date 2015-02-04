@@ -7,25 +7,34 @@ if [ "$(find $1 -type f -name '*.mp4')" ]; then
 	for filename in `find $1 -type f -name '*.mp4'`; do
 
 		# Break up file name into variables filename & extension
+		path="${filename%/*}"
+		prefix="${filename##*/}"
+		prefix="${prefix%.*}"
 		extension="${filename##*.}"
-		filename="${filename%.*}"
-		echo "\nConverting file $filename.$extension...\n"
+		pathprefix="$path/$prefix"
+		
+		# echo "path: $path"
+		# echo "prefix: $prefix"
+		# echo "extension: $extension"
+		# echo "path and prefix: $path/$prefix"
+		# echo "filename: $filename"
+		# echo
+		echo "\nConverting $prefix.$extension...\n"
 
 		# THEORA CONVERT
 		#
-		echo "\nOgg Theora\n----------"
+		# echo "\nOgg Theora\n----------"
 
 		# Check if theora file exists
-		if [ -e "$filename.ogv" ]
+		if [ -e "$pathprefix.ogv" ]
 		then
 			until [ "$overwrite" = "y" ] || [ "$overwrite" = "n" ]; do
-				echo "Destination file $filename.ogv already exists. Overwrite? [y,N]"
+				echo "Destination file $prefix.ogv already exists. Overwrite? [y,N]"
 				read -n 1 overwrite
 
 				case $overwrite in
 					y) #echo "\nOVERWRITING FILE."
-						ffmpeg2theora "$filename.mp4"
-						
+						ffmpeg2theora "$filename"
 					;;
 					n) echo "\nNOT OVERWRITING FILE."
 					;;
@@ -39,14 +48,14 @@ if [ "$(find $1 -type f -name '*.mp4')" ]; then
 				esac
 			done
 		else 
-			#echo "DESTINATION FILE DOESN'T EXIST; CONVERTING."
-			ffmpeg2theora "$filename.mp4"
+			#echo "DESTINATION FILE '$path.ogv' DOESN'T EXIST; CONVERTING."
+			ffmpeg2theora "$filename"
 		fi
 
-		# WEBM CONVERT
-		#
-		echo "\nWebm\n----"
-		# ffmpeg -i "$filename.mp4" "$filename.webm"
+		# # WEBM CONVERT
+		# #
+		# #echo "\nWebm\n----"
+		# # ffmpeg -i "$filename.mp4" "$filename.webm"
 	done
 else
     echo "No mp4 files found in directory '$1'."
