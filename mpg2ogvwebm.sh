@@ -1,28 +1,48 @@
-#!/bin/sh
+#!/bin/bash
 
+# Argument $1 is directory PATH
+# Argument $2 is REPLACE FILES (y,n)
+#
 ### Check this article out: http://askubuntu.com/questions/343727/filenames-with-spaces-breaking-for-loop-find-command
 
 # Declare variables
-if [ "$2" == "skip" ]; then
-	skip="$2"
-fi
+# if [ "$2" == "n" ]; then
+# 	echo "Do not overwrite"
+# elif [ "$2" == "y" ]; then
+# 	echo "Always overwrite"
+# else
+# 	echo "Not defined"
+# fi
 
-# Function to convert to theora
-converttheora()
-{
-	echo "\nConverting $prefix.$extension to OggTheora...\n"
-	$(ffmpeg2theora $1)
-}
+# exit
 
-# Function to convert to webm
-convertwebm()
+# Array with file formats
+targetformat[0]="ogv"
+targetformat[1]="webm"
+
+# Array with format names
+formatname[0]="OggTheora"
+formatname[1]="Google Webm"
+
+# Convert to something
+convert()
 {
-	echo "\nConverting $prefix.$extension to Webm...\n"
-	$(ffmpeg -i $1 $pathprefix.webm)
+	case $1 in
+		"ogv")
+			#echo "\nConverting $2 to OggTheora...\n"
+			$(ffmpeg2theora $2)
+		;;
+		"webm")
+			#echo "\nConverting $2 to Webm...\n"
+			$(ffmpeg -i $2 $pathprefix.webm)
+		;;
+	esac
 }
 
 # Only execute actions if there are mp4 files in directory
 if [ "$(find $1 -type f -name '*.mp4')" ]; then
+
+	# Cycle through all files in directory
 	for filename in `find $1 -type f -name '*.mp4'`; do
 
 		# Break up file name into variables filename & extension
@@ -31,7 +51,7 @@ if [ "$(find $1 -type f -name '*.mp4')" ]; then
 		prefix="${prefix%.*}"
 		extension="${filename##*.}"
 		pathprefix="$path/$prefix"
-		
+
 		# echo "filename: $filename"
 		# echo "path: $path"
 		# echo "prefix: $prefix"
@@ -39,32 +59,52 @@ if [ "$(find $1 -type f -name '*.mp4')" ]; then
 		# echo "path and prefix: $path/$prefix"
 		# echo
 
-		# Check if file exists
-		if [ -e "$pathprefix.ogv" ] && [ "$skip" != "skip" ]
-		then
-			overwrite=
-			until [ "$overwrite" = "y" ] || [ "$overwrite" = "n" ]; do
-				echo "Destination file $prefix.ogv already exists. Overwrite? [y,N]"
-				read -n 1 overwrite
+		i="0"
+		while [ $i -lt 2 ]; do
+			t_format="${targetformat[$i]}"
+			t_name="${formatname[$i]}"
 
-				case $overwrite in
-					y) #echo "\nOVERWRITING FILE."
-						converttheora "$filename"
-					;;
-					n) #echo "\nNOT OVERWRITING FILE."
-					;;
-					### TODO Find way to make "return" be the default
-					# "") let overwrite="y"
-					# 	echo "\nNOT OVERWRITING FILE."
-					# ;;
-					*) echo "Invalid choice. Please type 'y' or 'n'"
-					;;
-				esac
-			done
-		else 
-			#echo "DESTINATION FILE '$path.ogv' DOESN'T EXIST; CONVERTING."
-			converttheora "$filename"
-		fi
+			# Check if file exists AND user did not invoke 'do not overwrite' argument
+			if [ -e "$pathprefix.$t_format" ] && [ "$2" != "n" ]; then
+
+				overwrite=$2
+				if [ "$overwrite" ]; then
+					echo "Destination file '$pathprefix.$t_format' found; overwriting."
+					echo "\nConverting to $t_name..."
+				else
+					until [ "$overwrite" = "y" ] || [ "$overwrite" = "n" ]; do
+
+						if [ "$overwrite" != "y" ]; then
+							echo "Destination file $prefix.$t_format already exists. Overwrite? [y,N]"
+							read -n 1 overwrite
+						fi
+
+						case $overwrite in
+							y) echo "\nConverting to $t_name..."
+								# convert "$t_format" "$filename"
+							;;
+							n) #echo "\nNOT OVERWRITING FILE."
+							;;
+							### TODO Find way to make "return" be the default
+							# "") let overwrite="y"
+							# 	echo "\nNOT OVERWRITING FILE."
+							# ;;
+							*) echo "Invalid choice. Please type 'y' or 'n'"
+							;;
+						esac
+					done
+				fi
+
+			# If 'do not overwrite' argument was invoked
+			elif [ -e "$pathprefix.$t_format" ] && [ "$2" == "n" ]; then
+				echo "Destination file '$pathprefix.$t_format' found; skipping."
+			else
+				echo "Destination file '$pathprefix.$t_format' not found; converting to $t_format."
+				# convert "$t_format" "$filename"
+			fi
+
+			i=$[$i+1]
+		done
 	done
 else
     echo "No mp4 files found in directory '$1'."
