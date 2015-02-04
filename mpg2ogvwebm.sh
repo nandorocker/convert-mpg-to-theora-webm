@@ -1,14 +1,24 @@
 #!/bin/sh
 
 ### Check this article out: http://askubuntu.com/questions/343727/filenames-with-spaces-breaking-for-loop-find-command
+
+# Declare variables
+if [ "$2" == "skip" ]; then
+	skip="$2"
+fi
+
+# Function to convert to theora
 converttheora()
 {
-	$(ffmpeg2theora $filename)
+	echo "\nConverting $prefix.$extension to OggTheora...\n"
+	$(ffmpeg2theora $1)
 }
 
+# Function to convert to webm
 convertwebm()
 {
-	$(ffmpeg -i $filename $pathprefix.webm)
+	echo "\nConverting $prefix.$extension to Webm...\n"
+	$(ffmpeg -i $1 $pathprefix.webm)
 }
 
 # Only execute actions if there are mp4 files in directory
@@ -28,10 +38,9 @@ if [ "$(find $1 -type f -name '*.mp4')" ]; then
 		# echo "extension: $extension"
 		# echo "path and prefix: $path/$prefix"
 		# echo
-		echo "\nConverting $prefix.$extension to OggTheora...\n"
 
-		# Check if theora file exists
-		if [ -e "$pathprefix.ogv" ]
+		# Check if file exists
+		if [ -e "$pathprefix.ogv" ] && [ "$skip" != "skip" ]
 		then
 			overwrite=
 			until [ "$overwrite" = "y" ] || [ "$overwrite" = "n" ]; do
@@ -40,8 +49,7 @@ if [ "$(find $1 -type f -name '*.mp4')" ]; then
 
 				case $overwrite in
 					y) #echo "\nOVERWRITING FILE."
-						# ffmpeg2theora "$filename"
-						converttheora
+						converttheora "$filename"
 					;;
 					n) #echo "\nNOT OVERWRITING FILE."
 					;;
@@ -50,18 +58,13 @@ if [ "$(find $1 -type f -name '*.mp4')" ]; then
 					# 	echo "\nNOT OVERWRITING FILE."
 					# ;;
 					*) echo "Invalid choice. Please type 'y' or 'n'"
-					### Find a way to go back to top of the question
 					;;
 				esac
 			done
 		else 
 			#echo "DESTINATION FILE '$path.ogv' DOESN'T EXIST; CONVERTING."
-			# ffmpeg2theora "$filename"
-			converttheora
+			converttheora "$filename"
 		fi
-
-		# WEBM CONVERT
-		# ffmpeg -i "$filename.mp4" "$filename.webm"
 	done
 else
     echo "No mp4 files found in directory '$1'."
