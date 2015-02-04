@@ -5,17 +5,6 @@
 #
 ### Check this article out: http://askubuntu.com/questions/343727/filenames-with-spaces-breaking-for-loop-find-command
 
-# Declare variables
-# if [ "$2" == "n" ]; then
-# 	echo "Do not overwrite"
-# elif [ "$2" == "y" ]; then
-# 	echo "Always overwrite"
-# else
-# 	echo "Not defined"
-# fi
-
-# exit
-
 # Array with file formats
 targetformat[0]="ogv"
 targetformat[1]="webm"
@@ -52,13 +41,6 @@ if [ "$(find $1 -type f -name '*.mp4')" ]; then
 		extension="${filename##*.}"
 		pathprefix="$path/$prefix"
 
-		# echo "filename: $filename"
-		# echo "path: $path"
-		# echo "prefix: $prefix"
-		# echo "extension: $extension"
-		# echo "path and prefix: $path/$prefix"
-		# echo
-
 		i="0"
 		while [ $i -lt 2 ]; do
 			t_format="${targetformat[$i]}"
@@ -69,8 +51,9 @@ if [ "$(find $1 -type f -name '*.mp4')" ]; then
 
 				overwrite=$2
 				if [ "$overwrite" ]; then
-					echo "Destination file '$pathprefix.$t_format' found; overwriting."
+					#echo "Destination file '$pathprefix.$t_format' found; overwriting."
 					echo "\nConverting to $t_name..."
+					convert "$t_format" "$filename"
 				else
 					until [ "$overwrite" = "y" ] || [ "$overwrite" = "n" ]; do
 
@@ -81,7 +64,7 @@ if [ "$(find $1 -type f -name '*.mp4')" ]; then
 
 						case $overwrite in
 							y) echo "\nConverting to $t_name..."
-								# convert "$t_format" "$filename"
+								convert "$t_format" "$filename"
 							;;
 							n) #echo "\nNOT OVERWRITING FILE."
 							;;
@@ -99,8 +82,8 @@ if [ "$(find $1 -type f -name '*.mp4')" ]; then
 			elif [ -e "$pathprefix.$t_format" ] && [ "$2" == "n" ]; then
 				echo "Destination file '$pathprefix.$t_format' found; skipping."
 			else
-				echo "Destination file '$pathprefix.$t_format' not found; converting to $t_format."
-				# convert "$t_format" "$filename"
+				#echo "Destination file '$pathprefix.$t_format' not found; converting to $t_format."
+				convert "$t_format" "$filename"
 			fi
 
 			i=$[$i+1]
