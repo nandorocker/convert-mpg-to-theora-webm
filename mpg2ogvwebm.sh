@@ -1,6 +1,15 @@
 #!/bin/sh
 
 ### Check this article out: http://askubuntu.com/questions/343727/filenames-with-spaces-breaking-for-loop-find-command
+converttheora()
+{
+	$(ffmpeg2theora $filename)
+}
+
+convertwebm()
+{
+	$(ffmpeg -i $filename $pathprefix.webm)
+}
 
 # Only execute actions if there are mp4 files in directory
 if [ "$(find $1 -type f -name '*.mp4')" ]; then
@@ -13,30 +22,28 @@ if [ "$(find $1 -type f -name '*.mp4')" ]; then
 		extension="${filename##*.}"
 		pathprefix="$path/$prefix"
 		
+		# echo "filename: $filename"
 		# echo "path: $path"
 		# echo "prefix: $prefix"
 		# echo "extension: $extension"
 		# echo "path and prefix: $path/$prefix"
-		# echo "filename: $filename"
 		# echo
-		echo "\nConverting $prefix.$extension...\n"
-
-		# THEORA CONVERT
-		#
-		# echo "\nOgg Theora\n----------"
+		echo "\nConverting $prefix.$extension to OggTheora...\n"
 
 		# Check if theora file exists
 		if [ -e "$pathprefix.ogv" ]
 		then
+			overwrite=
 			until [ "$overwrite" = "y" ] || [ "$overwrite" = "n" ]; do
 				echo "Destination file $prefix.ogv already exists. Overwrite? [y,N]"
 				read -n 1 overwrite
 
 				case $overwrite in
 					y) #echo "\nOVERWRITING FILE."
-						ffmpeg2theora "$filename"
+						# ffmpeg2theora "$filename"
+						converttheora
 					;;
-					n) echo "\nNOT OVERWRITING FILE."
+					n) #echo "\nNOT OVERWRITING FILE."
 					;;
 					### TODO Find way to make "return" be the default
 					# "") let overwrite="y"
@@ -49,13 +56,12 @@ if [ "$(find $1 -type f -name '*.mp4')" ]; then
 			done
 		else 
 			#echo "DESTINATION FILE '$path.ogv' DOESN'T EXIST; CONVERTING."
-			ffmpeg2theora "$filename"
+			# ffmpeg2theora "$filename"
+			converttheora
 		fi
 
-		# # WEBM CONVERT
-		# #
-		# #echo "\nWebm\n----"
-		# # ffmpeg -i "$filename.mp4" "$filename.webm"
+		# WEBM CONVERT
+		# ffmpeg -i "$filename.mp4" "$filename.webm"
 	done
 else
     echo "No mp4 files found in directory '$1'."
